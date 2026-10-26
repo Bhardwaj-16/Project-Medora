@@ -1,0 +1,176 @@
+{
+  "nodes": [
+    {
+      "id": "hub_node",
+      "type": "text",
+      "text": "## \ud83c\udfe5 MEDORA HEALTH DATABASE\n**Relational Architecture & Clinical Schema**\n*MySQL Engine: InnoDB | Charset: UTF8MB4*",
+      "x": 350,
+      "y": -180,
+      "width": 420,
+      "height": 110,
+      "color": "6"
+    },
+    {
+      "id": "patient_details_node",
+      "type": "text",
+      "text": "### \ud83d\udc64 patient_details `[Core Master]`\n---\n- **PatID** `INT AUTO_INCREMENT` **[PK]**\n- `PatName` VARCHAR(100)\n- `MobileNumber` VARCHAR(15)\n- `Address` TEXT\n- `Age` INT\n- `DOB` DATE\n- `Weight` DECIMAL(5,2)\n- `LoginID` VARCHAR(50) [UNIQUE]\n- `Password` VARCHAR(255) [SHA-256]",
+      "x": 0,
+      "y": 60,
+      "width": 320,
+      "height": 290,
+      "color": "4"
+    },
+    {
+      "id": "doctor_catalog_node",
+      "type": "text",
+      "text": "### \ud83d\udc68\u200d\u2695\ufe0f doctor_catalog `[Master Catalog]`\n---\n- **DoctorID** `INT AUTO_INCREMENT` **[PK]**\n- `DoctorName` VARCHAR(100)\n- `Speciality` VARCHAR(100)\n- `YearsExperience` INT\n- `Qualification` VARCHAR(200)\n- `ContactNumber` VARCHAR(15)",
+      "x": 800,
+      "y": 60,
+      "width": 320,
+      "height": 240,
+      "color": "5"
+    },
+    {
+      "id": "tests_catalog_node",
+      "type": "text",
+      "text": "### \ud83e\uddea tests_catalog `[Service Catalog]`\n---\n- **TestID** `INT AUTO_INCREMENT` **[PK]**\n- `TestName` VARCHAR(100)\n- `Category` VARCHAR(50)\n- `Price` DECIMAL(8,2)\n- `Description` TEXT",
+      "x": 800,
+      "y": 420,
+      "width": 320,
+      "height": 220,
+      "color": "5"
+    },
+    {
+      "id": "patient_doctor_assignment_node",
+      "type": "text",
+      "text": "### \ud83e\udd1d patient_doctor_assignment `[Junction]`\n---\n- **AssignID** `INT AUTO_INCREMENT` **[PK]**\n- *PatID* `INT` **[FK -> patient_details]**\n- *DoctorID* `INT` **[FK -> doctor_catalog]**\n- `AssignDate` DATE\n- `Notes` TEXT\n*(ON DELETE CASCADE)*",
+      "x": 400,
+      "y": 140,
+      "width": 320,
+      "height": 210,
+      "color": "3"
+    },
+    {
+      "id": "tests_assigned_node",
+      "type": "text",
+      "text": "### \ud83d\udccb tests_assigned `[Junction]`\n---\n- **AssignID** `INT AUTO_INCREMENT` **[PK]**\n- *PatID* `INT` **[FK -> patient_details]**\n- *TestID* `INT` **[FK -> tests_catalog]**\n- `AssignDate` DATE\n- `Status` VARCHAR(20) [Pending|Done]\n- `Notes` TEXT\n*(ON DELETE CASCADE)*",
+      "x": 400,
+      "y": 430,
+      "width": 320,
+      "height": 230,
+      "color": "3"
+    },
+    {
+      "id": "blood_test_results_node",
+      "type": "text",
+      "text": "### \ud83d\udd2c blood_test_results `[Clinical Telemetry]`\n---\n- **ResultID** `INT AUTO_INCREMENT` **[PK]**\n- *PatID* `INT` **[FK -> patient_details]**\n- `TestDate` DATE\n- **CBC**: `RBC`, `WBC`, `Platelets`, `Haemoglobin`, `TLC`\n- **DLC**: `Neutrophils`, `Lymphocytes`, `Eosinophils`, `Basophils`, `Monocytes`\n*(ON DELETE CASCADE)*",
+      "x": 0,
+      "y": 430,
+      "width": 340,
+      "height": 250,
+      "color": "5"
+    },
+    {
+      "id": "admin_users_node",
+      "type": "text",
+      "text": "### \ud83d\udd10 admin_users `[System Administration]`\n---\n- **AdminID** `INT AUTO_INCREMENT` **[PK]**\n- `Username` VARCHAR(50) [UNIQUE]\n- `Password` VARCHAR(255) [SHA-256]\n- `FullName` VARCHAR(100)\n- `Role` VARCHAR(50) [SuperAdmin]",
+      "x": 400,
+      "y": 740,
+      "width": 320,
+      "height": 200,
+      "color": "1"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_hub_p",
+      "fromNode": "hub_node",
+      "fromSide": "left",
+      "toNode": "patient_details_node",
+      "toSide": "top",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "label": "Master Patient Registry"
+    },
+    {
+      "id": "e_hub_d",
+      "fromNode": "hub_node",
+      "fromSide": "right",
+      "toNode": "doctor_catalog_node",
+      "toSide": "top",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "label": "Provider Registry"
+    },
+    {
+      "id": "e_pat_blood",
+      "fromNode": "patient_details_node",
+      "fromSide": "bottom",
+      "toNode": "blood_test_results_node",
+      "toSide": "top",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "label": "1 : N (PatID CASCADE)"
+    },
+    {
+      "id": "e_pat_pda",
+      "fromNode": "patient_details_node",
+      "fromSide": "right",
+      "toNode": "patient_doctor_assignment_node",
+      "toSide": "left",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "label": "1 : N (PatID CASCADE)"
+    },
+    {
+      "id": "e_doc_pda",
+      "fromNode": "doctor_catalog_node",
+      "fromSide": "left",
+      "toNode": "patient_doctor_assignment_node",
+      "toSide": "right",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "label": "1 : N (DoctorID CASCADE)"
+    },
+    {
+      "id": "e_pat_tests",
+      "fromNode": "patient_details_node",
+      "fromSide": "bottom",
+      "toNode": "tests_assigned_node",
+      "toSide": "left",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "label": "1 : N (PatID CASCADE)"
+    },
+    {
+      "id": "e_cat_tests",
+      "fromNode": "tests_catalog_node",
+      "fromSide": "left",
+      "toNode": "tests_assigned_node",
+      "toSide": "right",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "label": "1 : N (TestID CASCADE)"
+    },
+    {
+      "id": "e_tests_blood",
+      "fromNode": "tests_assigned_node",
+      "fromSide": "left",
+      "toNode": "blood_test_results_node",
+      "toSide": "right",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "label": "Generates Diagnostics"
+    },
+    {
+      "id": "e_adm_sys",
+      "fromNode": "admin_users_node",
+      "fromSide": "top",
+      "toNode": "hub_node",
+      "toSide": "bottom",
+      "fromEnd": "none",
+      "toEnd": "arrow",
+      "label": "Governs & Audits System"
+    }
+  ]
+}
